@@ -14,14 +14,14 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
     public class MessageBusSubscriber : BackgroundService
     {
         private readonly IConfiguration _conf;
-        private readonly IEventProcessor _eventProcessor;
+        //private readonly IEventProcessor _eventProcessor;
         private IConnection _connection;
         private IModel _channel;
 
-        public MessageBusSubscriber(IConfiguration conf, IEventProcessor eventProcessor)
+        public MessageBusSubscriber(IConfiguration conf)
         {
             _conf = conf;
-            _eventProcessor = eventProcessor;
+            //_eventProcessor = eventProcessor;
             InitializeRabbitMQ();
         }
 
@@ -35,8 +35,8 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-
-            _channel.QueueDeclare(queue: "offerResponse", durable: false,
+            //_channel.ExchangeDeclare(exchange: "offerRequest")
+            _channel.QueueDeclare(queue: "offerRequestQueue", durable: false,
                              exclusive: false,
                              autoDelete: false,
                              arguments: null);
@@ -62,9 +62,9 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
                 var body = ea.Body;
                 var notificationMessage = Encoding.UTF8.GetString(body.ToArray());
 
-                _eventProcessor.ProcessEvent(notificationMessage);
+                //_eventProcessor.ProcessEvent(notificationMessage);
             };
-            _channel.BasicConsume(queue: "offerResponse", autoAck: true, consumer: consumer);
+            _channel.BasicConsume(queue: "offerRequestQueue", autoAck: true, consumer: consumer);
             return Task.CompletedTask;
         }
     }

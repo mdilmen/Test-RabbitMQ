@@ -29,14 +29,20 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "offerRequest", durable: false,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
-            _channel.QueueDeclare(queue: "offerResponse", durable: false,
-                             exclusive: false,
-                             autoDelete: false,
-                             arguments: null);
+            //_channel.QueueDeclare(queue: "offerRequest", durable: false,
+            //                             exclusive: false,
+            //                             autoDelete: false,
+            //                             arguments: null);
+            //_channel.QueueDeclare(queue: "offerResponse", durable: false,
+            //                 exclusive: false,
+            //                 autoDelete: false,
+            //                 arguments: null);
+
+            _channel.ExchangeDeclare(exchange: "offerRequest", ExchangeType.Direct);
+            var _queueName = _channel.QueueDeclare("offerRequestQueue");
+
+            _channel.QueueBind(queue: _queueName,
+                                exchange: "offerRequest", routingKey: _queueName);
 
             _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
 
@@ -68,7 +74,7 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
         {
         
             var body = Encoding.UTF8.GetBytes(message);
-            _channel.BasicPublish(  exchange:"",
+            _channel.BasicPublish(  exchange: "offerRequest",
                                     routingKey: "offerRequest",                                    
                                     basicProperties: null,
                                     body: body);
