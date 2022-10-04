@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,21 +24,40 @@ namespace Test.RabbitMQ.Gateway.Controllers
             _mapper = mapper;
         }
         [HttpPost]
-        public IActionResult SendOffer([FromBody] OfferModel model)
+        public IActionResult SendOffer([FromBody] OfferRequest model)
         {
+            model = ManipulateOfferRequest(model);
             try
             {
-                model.Id = new Random().Next(1,10000);
-                var offerPublishedModel = _mapper.Map<OfferPublishedModel>(model);
-                offerPublishedModel.Event = "Offer Published";                
-                _messageBus.PublishNewOffer(offerPublishedModel);
-                return Ok($"Offer Published : {model.Name}");
+                _messageBus.PublishNewOffer(model);
+                return Ok($"Offer Published for Brick : {model.BrickId}");
             }
             catch (Exception ex)
             {
-                return Ok($"Offer NOT Published : {ex.Message}");                
+                return Ok($"Offer NOT Published : {ex.Message}");
             }
 
         }
+        private static OfferRequest ManipulateOfferRequest(OfferRequest model)
+        {
+            var cepRequest = new CepRequest();
+            model.RequestData = JsonConvert.SerializeObject(cepRequest);
+            return model;
+        }
+
     }
+    public class CepRequest
+    {
+        public CepRequest()
+        {
+
+        }
+        public string? IMEI { get; set; } = "2349234992349";
+        public string? TCKN { get; set; } = "2701272828";
+        public string? FullName { get; set; } = "Ad Soyad";
+        public string? GSM { get; set; } = "05437585757";
+        public string? Email { get; set; } = "mmdilmen@gmail.com";
+
+    }
+
 }

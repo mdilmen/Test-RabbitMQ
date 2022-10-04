@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -7,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Test.RabbitMQ.Gateway.Models.Offer;
+using Test.RabbitMQ.Gateway.Models.Offer.Enums;
+using Test.RabbitMQ.Gateway.Models.OfferResponse;
 
 namespace Test.RabbitMQ.Gateway.EventProcessing
 {
@@ -22,42 +25,12 @@ namespace Test.RabbitMQ.Gateway.EventProcessing
         }
         public Task ProcessEvent(string message)
         {
-            var eventType = DetermineEvent(message);
+            var result = JsonConvert.DeserializeObject<OfferResponseModel>(message);
+
+            // Write Down to Repository..
+            Log.Information($"{message}");
 
             return Task.CompletedTask;
-            //throw new NotImplementedException();
         }
-        private Task addOffer(string offerPublishedMessage)
-        {
-            using (var scope = _scopeFactory.CreateScope())
-            {
-
-                var model = JsonConvert.DeserializeObject<OfferPublishedModel>(offerPublishedMessage);
-                Log.Information($"Offer Received from Que {model}");            
-            }
-
-            return Task.CompletedTask;
-        
-        }
-        private EventType DetermineEvent(string notificationMessage)
-        {
-            try
-            {
-                Log.Information($"Determine Message {notificationMessage}");
-                var eventType = JsonConvert.DeserializeObject<EventType>(notificationMessage);
-
-                return eventType;
-            }
-            catch (Exception)
-            {
-
-                return EventType.OfferPublished;
-            }
-        }
-    }
-    enum EventType
-    { 
-        OfferPublished,
-        OfferUnpublished,    
     }
 }

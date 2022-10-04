@@ -9,6 +9,6 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
 {
     public interface IMessageBusClient
     {
-        Task PublishNewOffer(OfferPublishedModel model);
+        Task PublishNewOffer(OfferRequest model);
     }
 }

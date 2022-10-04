@@ -7,14 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Test.RabbitMQ.Gateway.EventProcessing;
+using Test.RabbitMQ.OfferService.EventProcessing;
 
-namespace Test.RabbitMQ.Gateway.AsyncDataServices
+namespace Test.RabbitMQ.OfferService.AsyncDataServices
 {
     public class MessageBusSubscriber : BackgroundService
     {
         private readonly IConfiguration _conf;
-        private readonly IEventProcessor _eventProcessor;
+        private readonly IEventProcessor _eventProcessor;        
         private IConnection _connection;
         private IModel _channel;
 
@@ -22,12 +22,12 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
         {
             _conf = conf;
             _eventProcessor = eventProcessor;
-            InitializeRabbitMQ();
+            
+            InitializeRabbitMQ();            
         }
 
         private Task InitializeRabbitMQ()
-        {
-
+        {            
             var factory = new ConnectionFactory()
             {
                 HostName = _conf["RabbitMQHost"],
@@ -35,17 +35,17 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-
             // Gateway 
-            _channel.ExchangeDeclare(exchange: "Gateway", type: ExchangeType.Direct);
-            _channel.QueueDeclare(queue: "OfferRequest", durable: false,
+            _channel.ExchangeDeclare(exchange: "Offer", type: ExchangeType.Direct);
+            _channel.QueueDeclare(queue: "OfferResponse", durable: false,
                                          exclusive: false,
                                          autoDelete: false,
                                          arguments: null);
 
-            _channel.QueueBind("OfferRequest", "Gateway", "offerRequest");
+            _channel.QueueBind("OfferResponse", "Offer", "offerResponse");
 
-            _channel.QueueDeclare(queue: "OfferResponse", durable: false,
+
+            _channel.QueueDeclare(queue: "OfferRequest", durable: false,
                              exclusive: false,
                              autoDelete: false,
                              arguments: null);
@@ -73,7 +73,7 @@ namespace Test.RabbitMQ.Gateway.AsyncDataServices
 
                 _eventProcessor.ProcessEvent(notificationMessage);
             };
-            _channel.BasicConsume(queue: "OfferResponse", autoAck: true, consumer: consumer);
+            _channel.BasicConsume(queue: "OfferRequest", autoAck: true, consumer: consumer);
             return Task.CompletedTask;
         }
     }

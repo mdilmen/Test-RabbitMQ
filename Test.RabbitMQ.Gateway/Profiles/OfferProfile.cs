@@ -12,7 +12,7 @@ namespace Test.RabbitMQ.Gateway.Profiles
     {
         public OfferProfile()
         {
-            CreateMap<OfferModel, OfferPublishedModel>().ReverseMap();
+            //CreateMap<OfferModel, OfferPublishedModel>().ReverseMap();
         }
     }
 }

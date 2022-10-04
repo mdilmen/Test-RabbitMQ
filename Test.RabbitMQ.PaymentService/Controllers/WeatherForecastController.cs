@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Test.RabbitMQ.Gateway.Controllers
+namespace Test.RabbitMQ.PaymentService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
